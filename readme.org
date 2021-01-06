@@ -85,7 +85,7 @@ This was inspired by very nice [[https://gitlab.com/kisaragi-hiu/dired-show-read
 dired-show-readme displays a Readme file as an image, and also uses external
 process to render a file to an image. It would be possible to use svg-renderer
 in Emacs to render to an svg image, however, a drawback of an image is, well,
-that it is an image. I find myself often wishong to copy a link to a git repo or
+that it is an image. I find myself often wishing to copy a link to a git repo or
 elsewhere from a Readme file, so I prefer having them as plain text so I can
 move cursor freely in and out and copy text, click on links etc.
 
