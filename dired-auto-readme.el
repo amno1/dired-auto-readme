@@ -1,9 +1,9 @@
-;;; dired-auto-readme.el --- -*- lexical-binding: t; -*-
+;; dired-auto-readme.el --- -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Arthur Miller
 
 ;; Author: Arthur Miller <arthur.miller@live.com>
-;; Keywords: 
+;; Keywords:
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,18 +18,25 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
+;;; Commentary:
+;;
+;; All symbols starting with `dar--' are ment for internal use only.
+
+;;; Code:
+
 (defgroup dired-auto-readme nil
   "Automatically display 'readme' files when present in a dired buffer."
   :group 'files
   :prefix "dired-auto-readme")
 
 (defcustom dired-auto-readme-display-images t
-  "Display inline images in org-mode."
+  "Display inline images in `org-mode'."
   :type 'boolean)
 
 (defcustom dired-auto-readme-display-pretty-tables t
-  "Display \"prettified\" tables in org-mode.  It works only if you have
-  org-pretty-table installed."
+  "Display \"prettified\" tables in `org-mode'.
+It only works in org-mode if you have org-pretty-table installed."
   :link "https://github.com/Fuco1/org-pretty-table"
   :type 'boolean)
 
@@ -49,12 +56,20 @@
                                      "Readme.org"
                                      "Readme.markdown")
   
-  "List of file names to display automatically.  First file in the
-  directory matching the list will be used.  "
-  :type 'list)
+  "List of file names to display automatically.
+First file in the
+directory matching the list will be used."   :type 'list)
+
+;; internal vars
+(defvar dar--inserted)
+(defvar dar--orig-buff)
+(defvar dar--start-point)
+(make-variable-buffer-local 'dar--inserted)
+(make-variable-buffer-local 'dar--orig-buff)
+(make-variable-buffer-local 'dar--start-point)
 
 (defun dar--insert ()
-  "Insert README file in the current buffer.  "
+  "Insert README file in the current buffer."
   (setq inhibit-read-only t)
   (catch 'break
     (dolist (file dired-auto-readme-files)
@@ -78,10 +93,8 @@
                 (forward-line 1))
               (setq text (buffer-substring (point-min) (point-max)))
               (kill-buffer))
-            (make-variable-buffer-local 'dar--orig-buff)
             (setq dar--orig-buff (buffer-substring (point-min) (point-max)))
             (font-lock-mode -1)
-            (make-variable-buffer-local 'dar--start-point)
             (delete-region (point-min) (point-max))
             (insert dar--orig-buff)
             (setq dar--start-point (point))
@@ -102,6 +115,7 @@
           (throw 'break t))))))
 
 (defun dar--remove ()
+  "Remove README file from the current dired buffer."
   (setq inhibit-read-only t)
   (save-excursion
     (delete-region 1 (point-max))
@@ -109,7 +123,6 @@
     (kill-local-variable 'dar--inserted)
     (kill-local-variable 'dar--orig-buff)
     (kill-local-variable 'dar--start-point)
-    (setq dired-auto-readme--inserted nil)
     (font-lock-mode +1))
   (setq inhibit-read-only nil))
 
@@ -118,7 +131,6 @@
   "Dired minor mode to preview README in current directory."
   :global nil :lighter " README"
   (when (derived-mode-p 'dired-mode)
-    (make-variable-buffer-local 'dar--inserted)
     (cond (dired-auto-readme-mode
            (unless dar--inserted
              (dar--insert))
@@ -134,3 +146,5 @@
                         'dired-auto-readme-mode)))))
 
 (provide 'dired-auto-readme)
+
+;;; dired-auto-readme.el ends here

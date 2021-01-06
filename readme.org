@@ -25,11 +25,11 @@ tables, links and inline images, so previews are much nicer than with markdown
 mode.
 
 I suggest you to install [[https://github.com/Fuco1/org-pretty-table][org-pretty-table]] too (it is not a package), if you
-would like to see prettier tables in your reamde files too.
+would like to see prettier tables in your readme files too.
 
 * Install
 
-This is not in either Elpa nor Melpa yet, so currently you will have to either
+This is not yet in either Elpa nor Melpa, so currently you will have to either
 clone this repository or just download raw dired-auto-readme.el somewhere where
 your Emacs can find it.
 
