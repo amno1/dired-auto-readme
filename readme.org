@@ -1,0 +1,110 @@
+* Dired Auto Readme
+
+[[./images/org-mode.png]]
+
+Display a /Readme/ file in a dired buffer if one exists. The content of the file
+is displayed below the directory content. If the /Readme/ file is written in
+markdown or org format the formatting according to Emacs syntax rules for
+respective md and org formats will be applied.
+
+Cursor can freely move into the /Readme/ file content, and you can search, copy,
+click on links and call some Emacs functions on the content as avialable in
+respective modes. However, the file is read only so you can not modify it. Not
+even in wdired (it appears as modifiable, however upon save changes will be
+lost).
+
+How and how much is syntax highlighted, prettified, etc, depends on which
+packages you have installed.
+
+For markdown you should have [[https://jblevins.org/projects/markdown-mode/][markdown-mode]], but observe that preview of markdown
+mode is not implemented well in Emacs. You will mostly get just
+syntax-highlight, not live rendering.
+
+Org mode is much better in that regard. It can display bold, italics, underline,
+tables, links and inline images, so previews are much nicer than with markdown
+mode.
+
+I suggest you to install [[https://github.com/Fuco1/org-pretty-table][org-pretty-table]] too (it is not a package), if you
+would like to see prettier tables in your reamde files too.
+
+* Install
+
+This is not in either Elpa nor Melpa yet, so currently you will have to either
+clone this repository or just download raw dired-auto-readme.el somewhere where
+your Emacs can find it.
+
+* Usage
+
+To enable/disable dired-auto-readme-mode: M-x dired-auto-readme-mode.
+
+There are few settings that can be modified, either via
+customize->Files->Dired Auto Readme or via setq in your init file or a running
+Emacs session.
+
+dired-auto-readme-files - A list that lets you specify which files are
+considered as 'readme' files.
+
+dired-auto-readme-display-images - A boolean value that controles if images are
+displayed by default or not. Set it to nil to disable display of inline images.
+
+dired-auto-readme-display-pretty-tables - A boolean value that controles if
+tables are displayed with unicode characters. The value vill have effect only if
+you have [[https://github.com/Fuco1/org-pretty-table][org-pretty-table]] installed in your Emacs.
+
+* Known Problems
+
+Currently dired-auto-readme-mode does not play well with overlays. If you are
+using some mode that displays overlays, as for example [[https://github.com/clemera/dired-git-info][dired-git-info]], you will
+have to refresh your dired buffer after you toggle on/off dired-auto-readme-mode
+(just press 'g').
+
+There are hundreds of packages and possible variations, there are probably other
+bugs I am not aware off. If/when you find them, please report them or even
+better, give me a PR or send a patch.
+
+We are fighiting here with Emacs which is designed to display *one* major mode at
+a time. It comes to play with syntax hightlighing rules. What we really are
+trying to do here is to display content from a dired buffer, and a single file
+with two different major modes. Currently, I don't know of any "normal" way to
+achieve this in Emacs. [[https://github.com/polymode/polymode][Polymode]] comes to mind, but I haven't played with it, so
+I am not sure how hard/easy it is to use it. Maybe I'll try some other time.
+
+What I do here is a dirty (and somewhat inneficient) trick. I simply open file
+in another buffer, let Emacs do the magic, and then copy buffer content
+inclusive properties over to dired buffer with font-lock (syntax hightlight)
+turned off in dired buffer; and I also copy dired buffer with it's properties
+which I then insert back.
+
+It is inneficient, but As I have tested, I don't notice any speed problems on my
+computer. I guess it would need a directory with hundred files or really big
+readme file for this to be noticable.
+
+* About
+
+This was inspired by very nice [[https://gitlab.com/kisaragi-hiu/dired-show-readme][dired-show-readme]] by Kisaragi Hiu. However,
+dired-show-readme displays a Readme file as an image, and also uses external
+process to render a file to an image. It would be possible to use svg-renderer
+in Emacs to render to an svg image, however, a drawback of an image is, well,
+that it is an image. I find myself often wishong to copy a link to a git repo or
+elsewhere from a Readme file, so I prefer having them as plain text so I can
+move cursor freely in and out and copy text, click on links etc.
+
+* License
+
+Copyright (C) 2020  Arthur Miller
+
+Author: Arthur Miller <arthur.miller@live.com>
+Keywords: 
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
