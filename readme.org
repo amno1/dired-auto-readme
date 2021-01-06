@@ -1,6 +1,6 @@
 * Dired Auto Readme
 
-[[./images/org-mode.png]]
+[[./images/txt-mode.png]]
 
 Display a /Readme/ file in a dired buffer if one exists. The content of the file
 is displayed below the directory content. If the /Readme/ file is written in
