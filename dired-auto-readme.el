@@ -223,9 +223,15 @@ content is not currently inserted."
   (with-temp-buffer
     (insert-file-contents file)
     (when (require 'markdown-mode)
-      (markdown-view-mode))
-    (font-lock-mode +1)
-    (font-lock-ensure)
+      (if (equal file "README.md")
+          (progn
+            (message "GHM-VIEW")
+            (ghm-view-mode))
+        (markdown-view-mode)))
+    (let ((markdown-hide-markup t)
+          (markdown-fontify-code-blocks-natively t))
+      (font-lock-mode +1)
+      (font-lock-ensure))
       (goto-char (point-min))
     (let ((inhibit-read-only t))
       (while (not (eobp))
