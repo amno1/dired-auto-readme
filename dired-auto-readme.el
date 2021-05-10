@@ -225,8 +225,8 @@ content is not currently inserted."
     (when (require 'markdown-mode)
       (if (equal file "README.md")
           (progn
-            (message "GHM-VIEW")
-            (ghm-view-mode))
+            (message "GFM-VIEW")
+            (gfm-view-mode))
         (markdown-view-mode)))
     (let ((markdown-hide-markup t)
           (markdown-fontify-code-blocks-natively t))
