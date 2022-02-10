@@ -24,11 +24,6 @@ For markdown you should have [[https://jblevins.org/projects/markdown-mode/][mar
 Org will be displayed with org-mode with pretty entities, links and images
 enabled. You can turn off some of that if your computer is slow.
 
-How and how much is syntax highlighted, prettified, etc, depends on which
-packages you have installed in your Emacs. Org mode is much better in that
-regard. It can display bold, italics, underline, tables, links and inline
-images, so previews are much nicer than with markdown mode.
-
 I suggest to also install [[https://github.com/Fuco1/org-pretty-table][org-pretty-table]] (it is not a package), if you
 would like to see prettier tables in your readme files too.
 
