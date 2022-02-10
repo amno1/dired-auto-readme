@@ -1,4 +1,9 @@
 * News
+<2022-02-10 tor>
+
+Refactored more, made it to work with org-view-mode for even prettier dired
+renderings :).
+
 <2021-05-10 mån>
 
 Completely reworked, with better org/markdown preview.
@@ -8,27 +13,28 @@ Completely reworked, with better org/markdown preview.
 [[./images/txt-mode.png]]
 
 Display a /Readme/ file in a dired buffer if one exists. The content of the file
-is displayed below the directory content. Cursor can freely move into the /Readme/ 
+is displayed below the directory content. Cursor can freely move into the /Readme/
 file content, and you can search, copy, click on links and call some Emacs
 functions on the content as avialable in respective modes. However, the file is
-read only so you can not modify it. Also some functionality will not be
-avialable due to file being read only. For example you can't fold in/out
-org-headlines.
+read only so you can not modify it, and some other functionality normally found
+might also not be available.
 
-For markdown you should have [[https://jblevins.org/projects/markdown-mode/][markdown-mode]], but observe that preview of markdown
-mode is not implemented well in Emacs. You will mostly get just
-syntax-highlight, not a live rendering.
+For markdown you should have [[https://jblevins.org/projects/markdown-mode/][markdown-mode]].
 
 Org will be displayed with org-mode with pretty entities, links and images
-enabled. You can turn some of that off if your computer is slow.
+enabled. You can turn off some of that if your computer is slow.
 
 How and how much is syntax highlighted, prettified, etc, depends on which
 packages you have installed in your Emacs. Org mode is much better in that
 regard. It can display bold, italics, underline, tables, links and inline
 images, so previews are much nicer than with markdown mode.
 
-I suggest you to install [[https://github.com/Fuco1/org-pretty-table][org-pretty-table]] too (it is not a package), if you
+I suggest to also install [[https://github.com/Fuco1/org-pretty-table][org-pretty-table]] (it is not a package), if you
 would like to see prettier tables in your readme files too.
+
+Also to reduce some markup clutter in your org mode files, I suggest installing
+[[https://github.com/amno1/org-view-mode][org-view-mode]]. If any of those are available, dired-auto-readme will turn them
+on automatically in dired preview.
 
 * Install
 
@@ -70,7 +76,7 @@ have to refresh your dired buffer after you toggle on/off dired-auto-readme-mode
 (just press 'g').
 
 There are hundreds of packages and possible variations, there are probably other
-bugs I am not aware off.  See if it works for you, and if/when you find them,
+bugs I am not aware off.  See if it works for you, and if/when you find problems,
 please report them or even better, give me a PR or send a patch.
 
 What I do here is a dirty (and somewhat inneficient) trick. I simply open file
@@ -89,9 +95,9 @@ This was inspired by very nice [[https://gitlab.com/kisaragi-hiu/dired-show-read
 dired-show-readme displays a Readme file as an image, and also uses external
 process to render a file to an image. It would be possible to use svg-renderer
 in Emacs to render to an svg image, however, a drawback of an image is, well,
-that it is an image. I find myself often wishing to copy a link to a git repo or
-elsewhere from a Readme file, so I prefer having them as plain text so I can
-move cursor freely in and out and copy text, click on links etc.
+that it is an image. I find myself often wishing to click on a link in a Readme
+file, so I prefer having them as plain text so I can move cursor freely in and
+out and copy text, click on links etc.
 
 * License
 
