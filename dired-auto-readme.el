@@ -239,7 +239,7 @@ This function assumes the content is not currently inserted."
   (org-toggle-pretty-entities)
   (setq org-link-descriptive t)
   (when (and dired-auto-readme-display-pretty-tables
-             (require 'org-pretty-table))
+             (require 'org-pretty-table nil t))
     (org-pretty-table-mode 1))
   (require 'package)
   (and (package-installed-p 'org-view-mode)
