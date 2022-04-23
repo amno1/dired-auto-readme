@@ -6,7 +6,7 @@
 ;; Version: 1.0.0
 ;; Keywords: tools convenience
 ;; Package-Requires: ((emacs "25.1"))
-;; URL: https://github.com/amno1/org-view-mode
+;; URL: https://github.com/amno1/dired-auto-readme
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
