@@ -1,0 +1,131 @@
+[[https://melpa.org/packages/dired-auto-readme-badge.svg]] [[https://img.shields.io/badge/License-GPLv3-blue.svg]]
+
+* News
+
+<2022-09-21 ons>
+
+The package is now (almost) completely reworked again. I think it is getting to
+the point where I think it could be submitted as a package to Melpa. Fixed are
+some bugs and the implementation is reworked to be more efficient. Also, dealing
+with extra beautifying options, like displaying inlined images, markdown/org
+view modes, are now left for the end user as an option in respective mode
+hooks. That lets me remove few options, and simplify the package while making it
+more efficient too.
+
+Gone is also private "mime" list, auto-readme-mode now automatically enables
+whichever mode is registered with Emacs with a given extension. There is still
+`dired-auto-readme-alist' which holds cons pairs in form of (major-mode . hook).
+Hook is an user function called when a major-mode is enabled in README buffer.
+
+<2022-02-10 tor>
+
+Refactored more, made it to work with org-view-mode for even prettier dired
+renderings.
+
+<2021-05-10 mån>
+
+Completely reworked, with better org/markdown preview.
+
+* Dired Auto Readme
+
+[[./images/txt-mode.png]]
+
+Display a /Readme/ file in a Dired buffer if one exists. The content of the file
+is displayed below the directory content. Cursor can freely move into the /Readme/
+file content, and you can search, copy, click on links and call some Emacs
+functions on the content as avialable in respective modes. However, the file is
+read only so you can not modify it, and some other functionality normally found
+might also not be available.
+
+I suggest installing [[https://jblevins.org/projects/markdown-mode/][markdown-mode]], [[https://github.com/Fuco1/org-pretty-table][org-pretty-table]] and [[https://github.com/amno1/org-view-mode][org-view-mode]] for
+prettier renderings. This is just optional. To enable them, add those as options
+via user hook (see `dired-auto-readme-alist').
+
+* Install
+
+This is not yet in either Elpa nor Melpa, so currently you will have to either
+clone this repository or just download raw dired-auto-readme.el somewhere where
+your Emacs can find it.
+
+* Usage
+
+To enable/disable dired-auto-readme-mode: M-x dired-auto-readme-mode.
+
+There are few settings that can be modified, either via
+customize->Files->Dired Auto Readme or by setting the variables in init file or
+a running Emacs session.
+
+dired-auto-readme-files - A regular expression to specify what is considered as
+readme files.
+
+dired-auto-readme-alist - A list holding hooks to be called when a major mode is
+enabled in a readme file. It will be called *after* the mode and font-lock are
+enabled. For example I have this in my init file to enable some org/markdown
+features and to actually enble "view" version of those modes for cleaner preview:
+
+#+begin_src emacs-lisp
+(add-to-list 'dired-auto-readme-alist '(org-mode . org-view-mode))
+(add-to-list 'dired-auto-readme-alist '(markdown-mode . (lambda ()
+                                                          (markdown-view-mode)
+                                                          (font-lock-ensure))))
+#+end_src
+
+It is important when font-lock is called. For some reason I have to call
+`font-lock-ensure' after the markdown-view-mode. I guess it depends on 
+how things are implemented internally in each mode, but the content is, you
+might have to test a bit if you encounter issues.
+
+* Known Problems
+
+We are combining here two major modes from two different buffers in one buffer,
+something Emacs is not ment to do so there will be some problems. The real
+problem is that most minor modes expect to work with only one major mode buffer,
+in this case Dired. If a minor mode will do something over entire Dired buffer
+there will be issues, unfortunately. Sometimes it is enough to press 'g' to
+update dired buffer so it will render properly, but for some modes there will be
+artifacts, and other won't work at all.
+
+For example dired-auto-readme-mode does not play well with overlays. If you are
+using some mode that displays overlays, as for example [[https://github.com/clemera/dired-git-info][dired-git-info]], you will
+have to refresh your dired buffer after you toggle on/off dired-auto-readme-mode
+(just press 'g').
+
+There are hundreds of packages and possible variations, there are probably other
+bugs I am not aware off.  See if it works for you, and if/when you find problems,
+please report them or even better, give me a PR or send a patch.
+
+What I do here is a dirty (and somewhat inneficient) trick. I simply open file
+in another buffer, let Emacs do the magic, and then copy buffer content
+inclusive properties over to dired buffer with font-lock (syntax hightlight)
+tuned to work only on dired portion of the buffer.
+
+It is inneficient, but As I have tested, I don't notice any speed problems on my
+computer, even on one older dual core laptop from 2016. I guess it would need a
+directory with hundred files or really big readme file for this to be
+noticable (if org/markdown modes are already loaded in Emacs).
+
+To speed up things when browsing directories, I suggest loading org-mode,
+rst-mode and markdown-mode in an idle-timer when Emacs starts.
+
+* [ ] TODO
+- [ ] copy over overlays; for example org-view-mode will use some overlays for
+prettier renderings; requires to recalculate overlay positions in dired buffer
+- [ ] save rendered preview into some cache file so we save CPU time (text props
+& overlayes)
+- [ ] explore if variuos "badges" (CI, Melpa etc) can be displayed prettier,
+they introduce so much noise in the beggining of the README in some repos
+
+* About
+
+This was inspired by very nice [[https://gitlab.com/kisaragi-hiu/dired-show-readme][dired-show-readme]] by Kisaragi Hiu. However,
+dired-show-readme displays a Readme file as an image, and also uses external
+process to render a file to an image. It would be possible to use svg-renderer
+in Emacs to render to an svg image, however, a drawback of an image is, well,
+that it is an image. I find myself often wishing to click on a link in a Readme
+file, so I prefer having them as plain text so I can move cursor freely in and
+out and copy text, click on links etc.
+
+* License
+
+GPL v3. For details, see the attached [[file:LICENSE][license file]].
+
