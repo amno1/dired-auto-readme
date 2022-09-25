@@ -61,7 +61,7 @@ These hooks are called after the major mode is set and font-lock is enabled."
 (defvar-local dired-auto-readme--inserted nil)
 (defvar-local dired-auto-readme--readme-buff nil)
 
-(defun dired-auto-readme--font-lock-fn ()
+(defun dired-auto-readme--font-lock-fn (&optional interactively)
   "Dired-auto-readme `font-lock-fn'.
 Argument FL Same as in `font-lock-fontify-buffer' function."
   (dired-auto-readme--fontify-buffer))
