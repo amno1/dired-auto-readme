@@ -178,8 +178,8 @@ This function assumes the content is not currently inserted."
 
 (defvar dired-auto-readme-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [remap wdired-change-to-wdired-mode]
-                #'dired-auto-readme--to-wdired)
+    (define-key map [remap wdired-change-to-dired-mode]
+                #'dired-auto-readme--to-dired)
     (define-key map [remap wdired-change-to-wdired-mode]
                 #'dired-auto-readme--to-wdired)
     (define-key map [remap dired-create-directory]
