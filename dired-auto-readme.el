@@ -57,6 +57,9 @@ These hooks are called after the major mode is set and font-lock is enabled."
 (require 'font-lock)
 (require 'text-property-search)
 
+(eval-when-compile
+  (require 'wdired))
+
 ;; internal vars
 (defvar-local dired-auto-readme--inserted nil)
 (defvar-local dired-auto-readme--readme-buff nil)
@@ -145,6 +148,16 @@ This function assumes the content is not currently inserted."
   "Insert README file in the current buffer."
   (add-hook 'dired-before-readin-hook #'dired-auto-readme--before-readin nil t)
   (add-hook 'dired-after-readin-hook #'dired-auto-readme--after-readin nil t)
+  (advice-add 'wdired-change-to-dired-mode :after
+              (lambda () (if (bound-and-true-p dired-auto-readme-mode)
+                             (dired-auto-readme--insert))))
+  (advice-add 'wdired-change-to-wdired-mode :before
+              (lambda () (if dired-auto-readme--inserted
+                             (dired-auto-readme--remove))))
+  (advice-add 'dired-create-directory :after
+              (lambda () (revert-buffer t t t)))
+  (advice-add 'dired-create-empty-file :after
+              (lambda () (revert-buffer t t t)))
   (font-lock-mode +1)
   (let ((file (car (directory-files "./" nil dired-auto-readme-file t))))
     (when file
@@ -171,23 +184,20 @@ This function assumes the content is not currently inserted."
         dired-auto-readme--readme-buff nil)
   (remove-hook 'dired-before-readin-hook 'dired-auto-readme--before-readin t)
   (remove-hook 'dired-after-readin-hook 'dired-auto-readme--after-readin t)
+  (advice-remove 'wdired-change-to-dired-mode
+              (lambda () (if (bound-and-true-p dired-auto-readme-mode)
+                             (dired-auto-readme--insert))))
+  (advice-remove 'wdired-change-to-wdired-mode
+              (lambda () (if dired-auto-readme--inserted
+                             (dired-auto-readme--remove))))
+  (advice-remove 'dired-create-directory
+              (lambda () (revert-buffer t t t)))
+  (advice-remove 'dired-create-empty-file
+              (lambda () (revert-buffer t t t)))
   (setq font-lock-function #'font-lock-default-function
         font-lock-fontify-region-function #'font-lock-default-fontify-region
         font-lock-fontify-buffer-function #'font-lock-default-fontify-buffer)
   (if (bound-and-true-p font-lock-mode) (font-lock-ensure)))
-
-(defvar dired-auto-readme-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [remap wdired-change-to-dired-mode]
-                #'dired-auto-readme--to-dired)
-    (define-key map [remap wdired-change-to-wdired-mode]
-                #'dired-auto-readme--to-wdired)
-    (define-key map [remap dired-create-directory]
-                #'dired-auto-readme--create-directory)
-    (define-key map [remap dired-create-empty-file]
-                #'dired-auto-readme--create-empty-file)
-    map)
-  "Keymap used for `dired-auto-readme-mode'.")
 
 ;; (defun dired-auto-readme--get-overlays ()
 ;;   "Copy overlays from org-mode buffer to dired buffer."
@@ -216,32 +226,6 @@ Argument FILE Readme file to insert."
       (buffer-string))))
 
 ;;; User commands
-(defun dired-auto-readme--create-directory ()
-  "Same as `dired-create-directory' adapted for `dired-auto-readme-mode'."
-  (interactive)
-  (call-interactively 'dired-create-directory)
-  (revert-buffer t t t))
-
-(defun dired-auto-readme--create-empty-file ()
-  "Same as `dired-create-empty-file' adapted for `dired-auto-readme-mode'."
-  (interactive)
-  (call-interactively 'dired-create-empty-file)
-  (revert-buffer t t t))
-
-(defun dired-auto-readme--to-dired ()
-  "Switch from wdired to Dired mode when `dired-auto-readme-mode' is enabled."
-  (interactive)
-  (wdired-change-to-dired-mode)
-  (when (bound-and-true-p dired-auto-readme-mode)
-    (dired-auto-readme--insert)))
-
-(defun dired-auto-readme--to-wdired ()
-  "Switch to wdired mode when `dired-auto-readme-mode' is enabled."
-  (interactive)
-  (when dired-auto-readme--inserted
-    (dired-auto-readme--remove))
-  (wdired-change-to-wdired-mode))
-
 ;;;###autoload
 (define-minor-mode dired-auto-readme-mode
   "Dired minor mode to enable README file preview in current directory."
