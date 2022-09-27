@@ -70,10 +70,9 @@ features and to actually enble "view" version of those modes for cleaner preview
                                                           (font-lock-ensure))))
 #+end_src
 
-It is important when font-lock is called. For some reason I have to call
-`font-lock-ensure' after the markdown-view-mode. I guess it depends on 
-how things are implemented internally in each mode, but the content is, you
-might have to test a bit if you encounter issues.
+You might have to test a bit if you encounter issues. This mode *alters* the
+content of the dired buffer itself, so be sure to enable it as the very **last**
+of modes in your buffer.
 
 * Known Problems
 
