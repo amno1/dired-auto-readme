@@ -182,8 +182,8 @@ This function assumes the content is not currently inserted."
        (setq buffer-undo-list undo-list))))
   (setq dired-auto-readme--inserted nil
         dired-auto-readme--readme-buff nil)
-  (remove-hook 'dired-before-readin-hook 'dired-auto-readme--before-readin t)
-  (remove-hook 'dired-after-readin-hook 'dired-auto-readme--after-readin t)
+  (remove-hook 'dired-before-readin-hook #'dired-auto-readme--before-readin t)
+  (remove-hook 'dired-after-readin-hook #'dired-auto-readme--after-readin t)
   (advice-remove 'wdired-change-to-dired-mode
               (lambda () (if (bound-and-true-p dired-auto-readme-mode)
                              (dired-auto-readme--insert))))

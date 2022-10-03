@@ -1,31 +1,5 @@
 [[https://melpa.org/packages/dired-auto-readme-badge.svg]] [[https://img.shields.io/badge/License-GPLv3-blue.svg]]
 
-* News
-
-<2022-09-21 ons>
-
-The package is now (almost) completely reworked again. I think it is getting to
-the point where I think it could be submitted as a package to Melpa. Fixed are
-some bugs and the implementation is reworked to be more efficient. Also, dealing
-with extra beautifying options, like displaying inlined images, markdown/org
-view modes, are now left for the end user as an option in respective mode
-hooks. That lets me remove few options, and simplify the package while making it
-more efficient too.
-
-Gone is also private "mime" list, auto-readme-mode now automatically enables
-whichever mode is registered with Emacs with a given extension. There is still
-`dired-auto-readme-alist' which holds cons pairs in form of (major-mode . hook).
-Hook is an user function called when a major-mode is enabled in README buffer.
-
-<2022-02-10 tor>
-
-Refactored more, made it to work with org-view-mode for even prettier dired
-renderings.
-
-<2021-05-10 mån>
-
-Completely reworked, with better org/markdown preview.
-
 * Dired Auto Readme
 
 [[./images/txt-mode.png]]
@@ -123,6 +97,33 @@ in Emacs to render to an svg image, however, a drawback of an image is, well,
 that it is an image. I find myself often wishing to click on a link in a Readme
 file, so I prefer having them as plain text so I can move cursor freely in and
 out and copy text, click on links etc.
+
+* News
+
+<2022-09-21 ons>
+
+The package is now (almost) completely reworked again. I think it is getting to
+the point where I think it could be submitted as a package to Melpa. Fixed are
+some bugs and the implementation is reworked to be more efficient. Also, dealing
+with extra beautifying options, like displaying inlined images, markdown/org
+view modes, are now left for the end user as an option in respective mode
+hooks. That lets me remove few options, and simplify the package while making it
+more efficient too.
+
+Gone is also private "mime" list, auto-readme-mode now automatically enables
+whichever mode is registered with Emacs with a given extension. There is still
+`dired-auto-readme-alist' which holds cons pairs in form of (major-mode . hook).
+Hook is an user function called when a major-mode is enabled in README buffer.
+
+<2022-02-10 tor>
+
+Refactored more, made it to work with org-view-mode for even prettier dired
+renderings.
+
+<2021-05-10 mån>
+
+Completely reworked, with better org/markdown preview.
+
 
 * License
 
