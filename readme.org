@@ -1,4 +1,4 @@
-[[https://melpa.org/packages/dired-auto-readme-badge.svg]] [[https://img.shields.io/badge/License-GPLv3-blue.svg]]
+ [[https://img.shields.io/badge/License-GPLv3-blue.svg]]
 
 * Dired Auto Readme
 
@@ -79,14 +79,6 @@ noticable (if org/markdown modes are already loaded in Emacs).
 
 To speed up things when browsing directories, I suggest loading org-mode,
 rst-mode and markdown-mode in an idle-timer when Emacs starts.
-
-* [ ] TODO
-- [ ] copy over overlays; for example org-view-mode will use some overlays for
-prettier renderings; requires to recalculate overlay positions in dired buffer
-- [ ] save rendered preview into some cache file so we save CPU time (text props
-& overlayes)
-- [ ] explore if variuos "badges" (CI, Melpa etc) can be displayed prettier,
-they introduce so much noise in the beggining of the README in some repos
 
 * About
 
