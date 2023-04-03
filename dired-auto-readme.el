@@ -33,7 +33,6 @@
 
 ;;; Code:
 
-;; All symbols starting with `dired-auto-readme--' are ment for internal use only.
 
 ;;; User Options
 (defgroup dired-auto-readme nil
@@ -58,46 +57,42 @@ These hooks are called after the major mode is set and font-lock is enabled."
 (require 'text-property-search)
 (eval-when-compile (require 'wdired))
 
-(defvar-local dired-auto-readme--text nil)
+(defvar-local dired-auto-readme--text nil
+  "Readme file content.")
 
-(defmacro with-silent-buffer (&rest body)
+(defvar-local dired-auto-readme--spec nil
+  "`buffer-invisibility-spec' undo for the original dired buffer.")
+
+(defmacro with-quiet-mods (&rest body)
   "Like `with-silent-modifications' but with `save-excursion' and restore undo."
   (declare (debug t) (indent 0))
-  (let ((modified (make-symbol "modified")))
-    `(let* ((,modified (buffer-modified-p))
-            (undo-list buffer-undo-list)
-            (inhibit-read-only t)
-            (inhibit-modification-hooks t))
-       (unwind-protect
-           (progn
-             (save-excursion
-               ,@body))
-         (when (or (not ,modified)
-                   (eq ,modified 'autosaved))
-           (setq buffer-undo-list undo-list)
-           (restore-buffer-modified-p ,modified))))))
+  `(let ((undo-list buffer-undo-list))
+     (with-silent-modifications
+       (save-excursion
+         (unwind-protect (progn ,@body)
+           (setq buffer-undo-list undo-list))))))
 
 (defun dired-auto-readme--point ()
   "Return point of readme-file insertion or end of dired-buffer."
-  (let ((dar (or (text-property-search-backward 'dar-point)
-                 (text-property-search-forward 'dar-point))))
+  (let ((dar (or (text-property-search-backward 'bis)
+                 (text-property-search-forward 'bis))))
     (if dar (prop-match-beginning dar) (point-max))))
 
-(defun dired-auto-readme--fontify-buffer (_ _ &optional _)
+(defun dired-auto-readme--fontify-buffer (_ _ &optional v)
   "Fontify Dired portion of the buffer."
-  (font-lock-default-fontify-region 1 (dired-auto-readme--point) nil))
+  (font-lock-default-fontify-region 1 (dired-auto-readme--point) v))
 
 (defun dired-auto-readme--insert (&optional _)
   "Insert content of Readme file in a current Dired buffer.
 
 This function assumes the content is not currently inserted."
-  (with-silent-buffer
+  (with-quiet-mods
     (goto-char (point-max))
     (insert dired-auto-readme--text)))
 
 (defun dired-auto-readme--remove (&optional _)
   "Remove content of a Readme file from the current Dired buffer."
-  (with-silent-buffer
+  (with-quiet-mods
     (let ((dar (dired-auto-readme--point)))
       (when dar (delete-region dar (point-max))))))
 
@@ -116,12 +111,19 @@ This function assumes the content is not currently inserted."
       (advice-add 'dired-create-empty-file :after #'dired-auto-readme--insert)
       (advice-add 'dired-create-empty-file :before #'dired-auto-readme--remove)
       (setq dired-auto-readme--text (dired-auto-readme--text file)
-            font-lock-fontify-region-function #'dired-auto-readme--fontify-buffer))
+            font-lock-fontify-region-function
+            #'dired-auto-readme--fontify-buffer
+            dired-auto-readme--spec
+            (if (listp buffer-invisibility-spec)
+                (copy-sequence buffer-invisibility-spec)
+              buffer-invisibility-spec))
+      (dolist (spec (get-text-property 1 'bis dired-auto-readme--text))
+        (add-to-invisibility-spec spec)))
     (revert-buffer t t)))
 
 (defun dired-auto-readme--disable ()
   "Remove README file from the current Dired buffer."
-  (with-silent-buffer
+  (with-quiet-mods
     (when dired-auto-readme--text
       (dired-auto-readme--remove)
       (remove-hook 'dired-after-readin-hook #'dired-auto-readme--insert t)
@@ -133,6 +135,7 @@ This function assumes the content is not currently inserted."
       (advice-remove 'wdired-change-to-dired-mode #'dired-auto-readme--insert)
       (advice-remove 'wdired-change-to-wdired-mode #'dired-auto-readme--remove)
       (setq dired-auto-readme--text nil
+            buffer-invisibility-spec (copy-sequence dired-auto-readme--spec)
             font-lock-fontify-region-function #'font-lock-default-fontify-region)))
   (revert-buffer t t))
 
@@ -144,15 +147,20 @@ Argument FILE Readme file to insert."
       (let ((buffer-file-name file))
         (insert-file-contents file)
         (set-auto-mode)
+        (run-hooks (intern-soft (concat (symbol-name major-mode) "-hook")))
         (let ((hook (cdr (assoc major-mode dired-auto-readme-alist))))
           (when hook (funcall hook)))
         (font-lock-mode)
         (font-lock-ensure)
         (goto-char 1)
+        (switch-to-buffer (current-buffer))
         ;; put some space from the last file
         (insert "\n\n")
         (goto-char 1)
-        (put-text-property 1 2 'dar-point t)
+        (put-text-property
+         1 2 'bis (if (listp buffer-invisibility-spec)
+                      (copy-sequence buffer-invisibility-spec)
+                    't))
         ;; insert two spaces to align to text in dired-mode
         (while (not (eobp)) (insert "  ") (forward-line))
         (buffer-string)))))
