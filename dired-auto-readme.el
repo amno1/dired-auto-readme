@@ -40,7 +40,7 @@
   :group 'files
   :prefix "dired-auto-readme")
 
-;; need this because directory-files cares about case 
+;; need this because directory-files cares about case
 (defcustom dired-auto-readme-file "^\\([Rr]eadme\\|README\\)"
   "Regex used to tell which file is considered a readme file."
   :type 'string
@@ -53,48 +53,47 @@ These hooks are called after the major mode is set and font-lock is enabled."
   :group 'dired-auto-readme)
 
 ;;; Implementation
-(require 'font-lock)
 (require 'text-property-search)
-(eval-when-compile (require 'wdired))
 
 (defvar-local dired-auto-readme--text nil
   "Readme file content.")
 
 (defvar-local dired-auto-readme--spec nil
-  "`buffer-invisibility-spec' undo for the original dired buffer.")
-
-(defmacro with-quiet-mods (&rest body)
-  "Like `with-silent-modifications' but with `save-excursion' and restore undo."
-  (declare (debug t) (indent 0))
-  `(let ((undo-list buffer-undo-list))
-     (with-silent-modifications
-       (save-excursion
-         (unwind-protect (progn ,@body)
-           (setq buffer-undo-list undo-list))))))
+  "`buffer-invisibility-spec' undo for the original Dired buffer.")
 
 (defun dired-auto-readme--point ()
-  "Return point of readme-file insertion or end of dired-buffer."
+  "Return point of readme-file insertion or end of Dired buffer."
   (let ((dar (or (text-property-search-backward 'bis)
                  (text-property-search-forward 'bis))))
     (if dar (prop-match-beginning dar) (point-max))))
 
-(defun dired-auto-readme--fontify-buffer (_ _ &optional v)
-  "Fontify Dired portion of the buffer."
-  (font-lock-default-fontify-region 1 (dired-auto-readme--point) v))
+(defun dired-auto-readme--fontify-buffer (_ _ &optional loudly)
+  "Fontify Dired portion of the buffer, optionally LOUDLY."
+  (font-lock-default-fontify-region 1 (dired-auto-readme--point) loudly))
 
 (defun dired-auto-readme--insert (&optional _)
   "Insert content of Readme file in a current Dired buffer.
 
 This function assumes the content is not currently inserted."
-  (with-quiet-mods
-    (goto-char (point-max))
-    (insert dired-auto-readme--text)))
+  (with-silent-modifications
+    (save-excursion
+      (goto-char (point-max))
+      (insert dired-auto-readme--text))))
 
 (defun dired-auto-readme--remove (&optional _)
   "Remove content of a Readme file from the current Dired buffer."
-  (with-quiet-mods
-    (let ((dar (dired-auto-readme--point)))
-      (when dar (delete-region dar (point-max))))))
+  (with-silent-modifications
+    (save-excursion
+      (let ((dar (dired-auto-readme--point)))
+        (when dar (delete-region dar (point-max)))))))
+
+(defun dired-auto-readme--wrap (&rest app)
+  "Remov Readme, apply APP and finally insert Readme."
+  (unwind-protect
+      (progn
+        (dired-auto-readme--remove)
+        (apply app))
+    (dired-auto-readme--insert)))
 
 (defun dired-auto-readme--enable ()
   "Insert README file in the current buffer."
@@ -104,12 +103,9 @@ This function assumes the content is not currently inserted."
     (when file
       (add-hook 'dired-after-readin-hook #'dired-auto-readme--insert nil t)
       (add-hook 'dired-before-readin-hook #'dired-auto-readme--remove nil t)
-      (advice-add 'wdired-change-to-dired-mode :after #'dired-auto-readme--insert)
-      (advice-add 'wdired-change-to-wdired-mode :before #'dired-auto-readme--remove)
-      (advice-add 'dired-create-directory :after #'dired-auto-readme--insert)
-      (advice-add 'dired-create-directory :before #'dired-auto-readme--remove)
-      (advice-add 'dired-create-empty-file :after #'dired-auto-readme--insert)
-      (advice-add 'dired-create-empty-file :before #'dired-auto-readme--remove)
+      (advice-add 'wdired-change-to-dired-mode :around #'dired-auto-readme--wrap)
+      (advice-add 'dired-create-directory :around #'dired-auto-readme--wrap)
+      (advice-add 'dired-create-empty-file :around #'dired-auto-readme--wrap)
       (setq dired-auto-readme--text (dired-auto-readme--text file)
             font-lock-fontify-region-function
             #'dired-auto-readme--fontify-buffer
@@ -123,20 +119,18 @@ This function assumes the content is not currently inserted."
 
 (defun dired-auto-readme--disable ()
   "Remove README file from the current Dired buffer."
-  (with-quiet-mods
-    (when dired-auto-readme--text
-      (dired-auto-readme--remove)
-      (remove-hook 'dired-after-readin-hook #'dired-auto-readme--insert t)
-      (remove-hook 'dired-before-readin-hook #'dired-auto-readme--remove t)
-      (advice-remove 'dired-create-directory #'dired-auto-readme--insert)
-      (advice-remove 'dired-create-directory #'dired-auto-readme--remove)
-      (advice-remove 'dired-create-empty-file #'dired-auto-readme--insert)
-      (advice-remove 'dired-create-empty-file #'dired-auto-readme--remove)
-      (advice-remove 'wdired-change-to-dired-mode #'dired-auto-readme--insert)
-      (advice-remove 'wdired-change-to-wdired-mode #'dired-auto-readme--remove)
-      (setq dired-auto-readme--text nil
-            buffer-invisibility-spec (copy-sequence dired-auto-readme--spec)
-            font-lock-fontify-region-function #'font-lock-default-fontify-region)))
+  (with-silent-modifications
+    (save-excursion
+      (when dired-auto-readme--text
+        (dired-auto-readme--remove)
+        (remove-hook 'dired-after-readin-hook #'dired-auto-readme--insert t)
+        (remove-hook 'dired-before-readin-hook #'dired-auto-readme--remove t)
+        (advice-remove 'dired-create-directory #'dired-auto-readme--wrap)
+        (advice-remove 'dired-create-empty-file #'dired-auto-readme--wrap)
+        (advice-remove 'wdired-change-to-dired-mode #'dired-auto-readme--wrap)
+        (setq dired-auto-readme--text nil
+              buffer-invisibility-spec (copy-sequence dired-auto-readme--spec)
+              font-lock-fontify-region-function #'font-lock-default-fontify-region))))
   (revert-buffer t t))
 
 (defun dired-auto-readme--text (file)
@@ -157,6 +151,9 @@ Argument FILE Readme file to insert."
         ;; put some space from the last file
         (insert "\n\n")
         (goto-char 1)
+        ;; TODO The usage of the buffer-invisibility-spec seems suspicious to
+        ;; me. Why is that needed, why not simply use a custom text property
+        ;; like 'dired-auto--text? Maybe add a comment explaining this?
         (put-text-property
          1 2 'bis (if (listp buffer-invisibility-spec)
                       (copy-sequence buffer-invisibility-spec)
@@ -170,6 +167,8 @@ Argument FILE Readme file to insert."
 (define-minor-mode dired-auto-readme-mode
   "Dired minor mode to enable README file preview in current directory."
   :global nil :lighter " README"
+  (unless (derived-mode-p 'dired-mode)
+    (error "`dired-auto-readme-mode' should be enabled only in `dired-mode'"))
   (if dired-auto-readme-mode
       (dired-auto-readme--enable)
     (dired-auto-readme--disable)))
