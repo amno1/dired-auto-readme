@@ -1,5 +1,5 @@
 ;;; dired-auto-readme.el --- Auto-display README file in Dired biffers -*- lexical-binding: t; -*-
-
+
 ;; Copyright (C) 2020  Arthur Miller
 
 ;; Author: Arthur Miller
@@ -7,7 +7,8 @@
 ;; Keywords: tools convenience
 ;; Package-Requires: ((emacs "27.1"))
 ;; URL: https://github.com/amno1/dired-auto-readme
-
+
+;;; Licence
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -20,19 +21,16 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-
+
 ;;; Commentary:
-;;
+
 ;; Display README files in Dired buffers when such are present in a manner
-;; similar to public forges such as Codeberg or Github/Gitlab.  README files are
+;; similar to public forges such as Codeberg/Github/Gitlab.  README files are
 ;; displayed by default as plain text buffers, but if you have additional
 ;; packages such as markdown-mode or org-view-mode installed, you can enable
 ;; those for prettier previews.
-;;
 
 ;;; Code:
-
 
 ;;; User Options
 (defgroup dired-auto-readme nil
@@ -87,8 +85,11 @@ These hooks are called after the major mode is set and font-lock is enabled."
 
 This function assumes the content is not currently inserted."
   (with-quiet-mods
-    (goto-char (point-max))
-    (insert dired-auto-readme--text)))
+    (when dired-auto-readme--text
+      (goto-char (point-max))
+      (insert dired-auto-readme--text)
+      (add-to-invisibility-spec '(org-link))
+      (add-to-invisibility-spec '(org-link-description . t)))))
 
 (defun dired-auto-readme--remove (&optional _)
   "Remove content of a Readme file from the current Dired buffer."
