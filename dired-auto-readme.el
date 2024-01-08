@@ -47,13 +47,11 @@
 (defcustom dired-auto-readme-alist nil
   "List of modes and custom hooks to call when a README buffer is read-in.
 These hooks are called after the major mode is set and font-lock is enabled."
-  :type 'list
+  :type 'alist
   :group 'dired-auto-readme)
 
 ;;; Implementation
-(require 'font-lock)
 (require 'text-property-search)
-(eval-when-compile (require 'wdired))
 
 (defvar-local dired-auto-readme--text nil
   "Readme file content.")
@@ -87,9 +85,7 @@ This function assumes the content is not currently inserted."
   (with-quiet-mods
     (when dired-auto-readme--text
       (goto-char (point-max))
-      (insert dired-auto-readme--text)
-      (add-to-invisibility-spec '(org-link))
-      (add-to-invisibility-spec '(org-link-description . t)))))
+      (insert dired-auto-readme--text))))
 
 (defun dired-auto-readme--remove (&optional _)
   "Remove content of a Readme file from the current Dired buffer."
