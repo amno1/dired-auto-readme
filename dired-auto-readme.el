@@ -59,15 +59,6 @@ These hooks are called after the major mode is set and font-lock is enabled."
 (defvar-local dired-auto-readme--spec nil
   "`buffer-invisibility-spec' undo for the original dired buffer.")
 
-(defmacro with-quiet-mods (&rest body)
-  "Like `with-silent-modifications' but with `save-excursion' and restore undo."
-  (declare (debug t) (indent 0))
-  `(let ((undo-list buffer-undo-list))
-     (with-silent-modifications
-       (save-excursion
-         (unwind-protect (progn ,@body)
-           (setq buffer-undo-list undo-list))))))
-
 (defun dired-auto-readme--point ()
   "Return point of readme-file insertion or end of dired-buffer."
   (let ((dar (or (text-property-search-backward 'bis)
@@ -82,14 +73,14 @@ These hooks are called after the major mode is set and font-lock is enabled."
   "Insert content of Readme file in a current Dired buffer.
 
 This function assumes the content is not currently inserted."
-  (with-quiet-mods
+  (with-silent-modifications
     (when dired-auto-readme--text
       (goto-char (point-max))
       (insert dired-auto-readme--text))))
 
 (defun dired-auto-readme--remove (&optional _)
   "Remove content of a Readme file from the current Dired buffer."
-  (with-quiet-mods
+  (with-silent-modifications
     (let ((dar (dired-auto-readme--point)))
       (when dar (delete-region dar (point-max))))))
 
@@ -120,7 +111,7 @@ This function assumes the content is not currently inserted."
 
 (defun dired-auto-readme--disable ()
   "Remove README file from the current Dired buffer."
-  (with-quiet-mods
+  (with-silent-modifications
     (when dired-auto-readme--text
       (dired-auto-readme--remove)
       (remove-hook 'dired-after-readin-hook #'dired-auto-readme--insert t)
@@ -140,27 +131,26 @@ This function assumes the content is not currently inserted."
   "Internal function that actually does the work.
 Argument FILE Readme file to insert."
   (with-temp-buffer
-    (with-silent-modifications
-      (let ((buffer-file-name file))
-        (insert-file-contents file)
-        (set-auto-mode)
-        (run-hooks (intern-soft (concat (symbol-name major-mode) "-hook")))
-        (let ((hook (cdr (assoc major-mode dired-auto-readme-alist))))
-          (when hook (funcall hook)))
-        (font-lock-mode)
-        (font-lock-ensure)
-        (goto-char 1)
-        (switch-to-buffer (current-buffer))
-        ;; put some space from the last file
-        (insert "\n\n")
-        (goto-char 1)
-        (put-text-property
-         1 2 'bis (if (listp buffer-invisibility-spec)
-                      (copy-sequence buffer-invisibility-spec)
-                    't))
-        ;; insert two spaces to align to text in dired-mode
-        (while (not (eobp)) (insert "  ") (forward-line))
-        (buffer-string)))))
+    (let ((buffer-file-name file))
+      (insert-file-contents file)
+      (set-auto-mode)
+      (run-hooks (intern-soft (concat (symbol-name major-mode) "-hook")))
+      (let ((hook (cdr (assoc major-mode dired-auto-readme-alist))))
+        (when hook (funcall hook)))
+      (font-lock-mode)
+      (font-lock-ensure)
+      (goto-char 1)
+      (switch-to-buffer (current-buffer))
+      ;; put some space from the last file
+      (insert "\n\n")
+      (goto-char 1)
+      (put-text-property
+       1 2 'bis (if (listp buffer-invisibility-spec)
+                    (copy-sequence buffer-invisibility-spec)
+                  't))
+      ;; insert two spaces to align to text in dired-mode
+      (while (not (eobp)) (insert "  ") (forward-line))
+      (buffer-string))))
 
 ;;; User commands
 ;;;###autoload
