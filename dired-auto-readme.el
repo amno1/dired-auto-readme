@@ -131,26 +131,26 @@ This function assumes the content is not currently inserted."
   "Internal function that actually does the work.
 Argument FILE Readme file to insert."
   (with-temp-buffer
-    (let ((buffer-file-name file))
-      (insert-file-contents file)
-      (set-auto-mode)
-      (run-hooks (intern-soft (concat (symbol-name major-mode) "-hook")))
-      (let ((hook (cdr (assoc major-mode dired-auto-readme-alist))))
-        (when hook (funcall hook)))
-      (font-lock-mode)
-      (font-lock-ensure)
-      (goto-char 1)
-      (switch-to-buffer (current-buffer))
-      ;; put some space from the last file
-      (insert "\n\n")
-      (goto-char 1)
-      (put-text-property
-       1 2 'bis (if (listp buffer-invisibility-spec)
-                    (copy-sequence buffer-invisibility-spec)
-                  't))
-      ;; insert two spaces to align to text in dired-mode
-      (while (not (eobp)) (insert "  ") (forward-line))
-      (buffer-string))))
+    (with-silent-modifications
+      (let ((buffer-file-name file))
+        (insert-file-contents file)
+        (set-auto-mode)
+        (run-hooks (intern-soft (concat (symbol-name major-mode) "-hook")))
+        (let ((hook (cdr (assoc major-mode dired-auto-readme-alist))))
+          (when hook (funcall hook)))
+        (font-lock-mode)
+        (font-lock-ensure)
+        (goto-char 1)
+        ;; put some space from the last file
+        (insert "\n\n")
+        (goto-char 1)
+        (put-text-property
+         1 2 'bis (if (listp buffer-invisibility-spec)
+                      (copy-sequence buffer-invisibility-spec)
+                    't))
+        ;; insert two spaces to align to text in dired-mode
+        (while (not (eobp)) (insert "  ") (forward-line))
+        (buffer-string)))))
 
 ;;; User commands
 ;;;###autoload
