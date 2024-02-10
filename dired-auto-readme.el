@@ -107,7 +107,8 @@ This function assumes the content is not currently inserted."
               buffer-invisibility-spec))
       (dolist (spec (get-text-property 1 'bis dired-auto-readme--text))
         (add-to-invisibility-spec spec)))
-    (revert-buffer t t)))
+    (revert-buffer t t)
+    (goto-char (point-min))))
 
 (defun dired-auto-readme--disable ()
   "Remove README file from the current Dired buffer."
@@ -124,7 +125,9 @@ This function assumes the content is not currently inserted."
       (advice-remove 'wdired-change-to-wdired-mode #'dired-auto-readme--remove)
       (setq dired-auto-readme--text nil
             buffer-invisibility-spec (copy-sequence dired-auto-readme--spec)
-            font-lock-fontify-region-function #'font-lock-default-fontify-region)))
+            font-lock-fontify-region-function
+            #'font-lock-default-fontify-region)))
+  (goto-char (point-min))
   (revert-buffer t t))
 
 (defun dired-auto-readme--text (file)
