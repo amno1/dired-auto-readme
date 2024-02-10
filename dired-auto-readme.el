@@ -131,6 +131,7 @@ This function assumes the content is not currently inserted."
   "Internal function that actually does the work.
 Argument FILE Readme file to insert."
   (with-temp-buffer
+<<<<<<< HEAD
     (let ((buffer-file-name file))
       (insert "\n\n") ; put some space from the last file
       (insert-file-contents file)
@@ -139,9 +140,6 @@ Argument FILE Readme file to insert."
       (when-let ((hook (cdr (assoc major-mode dired-auto-readme-alist))))
         (funcall hook))
       (font-lock-mode)
-      (font-lock-ensure)
-      (goto-char 1)
-      (switch-to-buffer (current-buffer))
       (goto-char 1)
       (put-text-property
        1 2 'bis (if (listp buffer-invisibility-spec)
