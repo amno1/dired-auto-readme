@@ -73,61 +73,59 @@ These hooks are called after the major mode is set and font-lock is enabled."
   "Insert content of Readme file in a current Dired buffer.
 
 This function assumes the content is not currently inserted."
-  (with-silent-modifications
-    (when dired-auto-readme--text
-      (goto-char (point-max))
-      (insert dired-auto-readme--text))))
+  (when-let* ((files (directory-files "./" nil dired-auto-readme-file t))
+              (files (cl-remove-if #'file-directory-p files))
+              (file (car files)))
+    (with-silent-modifications
+      (save-excursion
+        (setq-local font-lock-fontify-region-function
+                    #'dired-auto-readme--fontify-region)
+        (setq dired-auto-readme--text (dired-auto-readme--text file))
+        (dolist (spec (get-text-property 1 'bis dired-auto-readme--text))
+          (add-to-invisibility-spec spec))
+        (goto-char (point-min))
+        (goto-char (point-max))
+        (insert dired-auto-readme--text)))))
 
 (defun dired-auto-readme--remove (&optional _)
   "Remove content of a Readme file from the current Dired buffer."
   (with-silent-modifications
-    (let ((dar (dired-auto-readme--point)))
-      (when dar (delete-region dar (point-max))))))
+    (save-excursion
+      (setq dired-auto-readme--text nil)
+      ;; invisibility spec is left with some garbage; fix for another day
+      (kill-local-variable 'font-lock-fontify-region-function)
+      (let ((dar (dired-auto-readme--point)))
+        (when dar (delete-region dar (point-max)))))))
 
 (defun dired-auto-readme--enable ()
   "Insert README file in the current buffer."
-  (let* ((files (directory-files "./" nil dired-auto-readme-file t))
-         (files (cl-remove-if #'file-directory-p files))
-         (file (car files)))
-    (when file
-      (setq-local font-lock-fontify-region-function
-                  #'dired-auto-readme--fontify-region)
-      (add-hook 'dired-after-readin-hook #'dired-auto-readme--insert nil t)
-      (add-hook 'dired-before-readin-hook #'dired-auto-readme--remove nil t)
-      (advice-add 'wdired-change-to-dired-mode :after #'dired-auto-readme--insert)
-      (advice-add 'wdired-change-to-wdired-mode :before #'dired-auto-readme--remove)
-      (advice-add 'dired-create-directory :after #'dired-auto-readme--insert)
-      (advice-add 'dired-create-directory :before #'dired-auto-readme--remove)
-      (advice-add 'dired-create-empty-file :after #'dired-auto-readme--insert)
-      (advice-add 'dired-create-empty-file :before #'dired-auto-readme--remove)
-      (setq dired-auto-readme--text (dired-auto-readme--text file)
-            dired-auto-readme--spec
-            (if (listp buffer-invisibility-spec)
-                (copy-sequence buffer-invisibility-spec)
-              buffer-invisibility-spec))
-      (dolist (spec (get-text-property 1 'bis dired-auto-readme--text))
-        (add-to-invisibility-spec spec)))
-    (revert-buffer t t)
-    (goto-char (point-min))))
+  (add-hook 'dired-after-readin-hook #'dired-auto-readme--insert nil t)
+  (add-hook 'dired-before-readin-hook #'dired-auto-readme--remove nil t)
+  (advice-add 'wdired-change-to-dired-mode :after #'dired-auto-readme--insert)
+  (advice-add 'wdired-change-to-wdired-mode :before #'dired-auto-readme--remove)
+  (advice-add 'dired-create-directory :after #'dired-auto-readme--insert)
+  (advice-add 'dired-create-directory :before #'dired-auto-readme--remove)
+  (advice-add 'dired-create-empty-file :after #'dired-auto-readme--insert)
+  (advice-add 'dired-create-empty-file :before #'dired-auto-readme--remove)
+  (when (eq major-mode 'dired-mode)
+    (with-silent-modifications
+      (dired-auto-readme--insert)
+      (revert-buffer t t))))
 
 (defun dired-auto-readme--disable ()
-  "Remove README file from the current Dired buffer."
-  (with-silent-modifications
-    (when dired-auto-readme--text
+  "Remove README file from the current Dired buffer."  
+  (remove-hook 'dired-after-readin-hook #'dired-auto-readme--insert t)
+  (remove-hook 'dired-before-readin-hook #'dired-auto-readme--remove t)
+  (advice-remove 'dired-create-directory #'dired-auto-readme--insert)
+  (advice-remove 'dired-create-directory #'dired-auto-readme--remove)
+  (advice-remove 'dired-create-empty-file #'dired-auto-readme--insert)
+  (advice-remove 'dired-create-empty-file #'dired-auto-readme--remove)
+  (advice-remove 'wdired-change-to-dired-mode #'dired-auto-readme--insert)
+  (advice-remove 'wdired-change-to-wdired-mode #'dired-auto-readme--remove)
+  (and (eq major-mode 'dired-mode) dired-auto-readme--text
+    (with-silent-modifications
       (dired-auto-readme--remove)
-      (remove-hook 'dired-after-readin-hook #'dired-auto-readme--insert t)
-      (remove-hook 'dired-before-readin-hook #'dired-auto-readme--remove t)
-      (advice-remove 'dired-create-directory #'dired-auto-readme--insert)
-      (advice-remove 'dired-create-directory #'dired-auto-readme--remove)
-      (advice-remove 'dired-create-empty-file #'dired-auto-readme--insert)
-      (advice-remove 'dired-create-empty-file #'dired-auto-readme--remove)
-      (advice-remove 'wdired-change-to-dired-mode #'dired-auto-readme--insert)
-      (advice-remove 'wdired-change-to-wdired-mode #'dired-auto-readme--remove)
-      (setq dired-auto-readme--text nil)))
-  ;; invisibility spec is left with some garbage; fix for another day
-  (kill-local-variable 'font-lock-fontify-region-function)
-  (goto-char (point-min))
-  (revert-buffer t t))
+      (revert-buffer t t))))
 
 (defun dired-auto-readme--text (file)
   "Internal function that actually does the work.
