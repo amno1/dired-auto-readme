@@ -65,7 +65,7 @@ These hooks are called after the major mode is set and font-lock is enabled."
                  (text-property-search-forward 'bis))))
     (if dar (prop-match-beginning dar) (point-max))))
 
-(defun dired-auto-readme--fontify-buffer (_ _ &optional v)
+(defun dired-auto-readme--fontify-region (_ _ &optional v)
   "Fontify Dired portion of the buffer."
   (font-lock-default-fontify-region 1 (dired-auto-readme--point) v))
 
@@ -90,6 +90,8 @@ This function assumes the content is not currently inserted."
          (files (cl-remove-if #'file-directory-p files))
          (file (car files)))
     (when file
+      (setq-local font-lock-fontify-region-function
+                  #'dired-auto-readme--fontify-region)
       (add-hook 'dired-after-readin-hook #'dired-auto-readme--insert nil t)
       (add-hook 'dired-before-readin-hook #'dired-auto-readme--remove nil t)
       (advice-add 'wdired-change-to-dired-mode :after #'dired-auto-readme--insert)
@@ -99,8 +101,6 @@ This function assumes the content is not currently inserted."
       (advice-add 'dired-create-empty-file :after #'dired-auto-readme--insert)
       (advice-add 'dired-create-empty-file :before #'dired-auto-readme--remove)
       (setq dired-auto-readme--text (dired-auto-readme--text file)
-            font-lock-fontify-region-function
-            #'dired-auto-readme--fontify-buffer
             dired-auto-readme--spec
             (if (listp buffer-invisibility-spec)
                 (copy-sequence buffer-invisibility-spec)
@@ -123,10 +123,9 @@ This function assumes the content is not currently inserted."
       (advice-remove 'dired-create-empty-file #'dired-auto-readme--remove)
       (advice-remove 'wdired-change-to-dired-mode #'dired-auto-readme--insert)
       (advice-remove 'wdired-change-to-wdired-mode #'dired-auto-readme--remove)
-      (setq dired-auto-readme--text nil
-            buffer-invisibility-spec (copy-sequence dired-auto-readme--spec)
-            font-lock-fontify-region-function
-            #'font-lock-default-fontify-region)))
+      (setq dired-auto-readme--text nil)))
+  ;; invisibility spec is left with some garbage; fix for another day
+  (kill-local-variable 'font-lock-fontify-region-function)
   (goto-char (point-min))
   (revert-buffer t t))
 
