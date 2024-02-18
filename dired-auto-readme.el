@@ -77,12 +77,10 @@ This function assumes the content is not currently inserted."
       (save-excursion
         (setq-local font-lock-fontify-region-function
                     #'dired-auto-readme--fontify-region)
-        (setq dired-auto-readme--text (dired-auto-readme--text file))
-        (dolist (spec (get-text-property 1 'bis dired-auto-readme--text))
-          (add-to-invisibility-spec spec))
-        (goto-char (point-min))
-        (goto-char (point-max))
-        (insert dired-auto-readme--text)))))
+        (let ((enable-local-variables nil))
+          (setq dired-auto-readme--text (dired-auto-readme--text file))
+          (goto-char (point-max))
+          (insert dired-auto-readme--text))))))
 
 (defun dired-auto-readme--remove (&optional _)
   "Remove content of a Readme file from the current Dired buffer."
@@ -156,5 +154,4 @@ Argument FILE Readme file to insert."
     (dired-auto-readme--disable)))
 
 (provide 'dired-auto-readme)
-
 ;;; dired-auto-readme.el ends here
