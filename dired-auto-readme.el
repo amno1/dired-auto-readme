@@ -56,9 +56,6 @@ These hooks are called after the major mode is set and font-lock is enabled."
 (defvar-local dired-auto-readme--text nil
   "Readme file content.")
 
-(defvar-local dired-auto-readme--spec nil
-  "`buffer-invisibility-spec' undo for the original dired buffer.")
-
 (defun dired-auto-readme--point ()
   "Return point of readme-file insertion or end of dired-buffer."
   (let ((dar (or (text-property-search-backward 'bis)
