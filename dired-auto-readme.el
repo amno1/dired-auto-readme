@@ -47,8 +47,7 @@
 (defcustom dired-auto-readme-alist nil
   "List of modes and custom hooks to call when a README buffer is read-in.
 These hooks are called after the major mode is set and font-lock is enabled."
-  :type 'alist
-  :group 'dired-auto-readme)
+  :type 'alist)
 
 ;;; Implementation
 (require 'text-property-search)
@@ -58,9 +57,9 @@ These hooks are called after the major mode is set and font-lock is enabled."
 
 (defun dired-auto-readme--point ()
   "Return point of readme-file insertion or end of dired-buffer."
-  (let ((dar (or (text-property-search-backward 'bis)
+  (if-let ((dar (or (text-property-search-backward 'bis)
                  (text-property-search-forward 'bis))))
-    (if dar (prop-match-beginning dar) (point-max))))
+      (prop-match-beginning dar) (point-max)))
 
 (defun dired-auto-readme--fontify-region (_ _ &optional v)
   "Fontify Dired portion of the buffer."
@@ -89,8 +88,8 @@ This function assumes the content is not currently inserted."
       (setq dired-auto-readme--text nil)
       ;; invisibility spec is left with some garbage; fix for another day
       (kill-local-variable 'font-lock-fontify-region-function)
-      (let ((dar (dired-auto-readme--point)))
-        (when dar (delete-region dar (point-max)))))))
+      (when-let ((dar (dired-auto-readme--point)))
+        (delete-region dar (point-max))))))
 
 (defun dired-auto-readme--enable ()
   "Insert README file in the current buffer."
