@@ -35,10 +35,10 @@ specified, so you can controll which file takes precidence.
 
 Example:
 
-#begin_src emacs-lisp
+#+begin_src emacs-lisp
 (setq dired-auto-readme-file '("manifest"
                                "readme\\.\\(org\\|rst\\|md\\|markdown\\)"
-#end_src
+#+end_src
 
 The above code will first check if file with name MANIFEST if available, and if
 found, display that one, if not it look for a readme file.
