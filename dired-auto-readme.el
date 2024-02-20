@@ -38,7 +38,7 @@
   :group 'files
   :prefix "dired-auto-readme")
 
-(defcustom dired-auto-readme-files '("readme\\.\\(org\\|rst\\|md\\|markdown\\)")
+(defcustom dired-auto-readme-files '("readme\\(\\.\\|org\\|rst\\|md\\|markdown\\)")
   "A list of regular expressions used to tell which file to use."
   :type '(list string)
   :group 'dired-auto-readme)
