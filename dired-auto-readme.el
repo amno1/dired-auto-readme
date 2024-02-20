@@ -70,9 +70,8 @@ These hooks are called after the major mode is set and font-lock is enabled."
   (catch 'file
     (save-excursion
       (while (dired-next-line 1)
-        (let ((file (dired-file-name-at-point)))
-          (when (string-match-p regex file)
-            (throw 'file file)))))))
+        (when (looking-at-p regex)
+          (throw 'file (dired-file-name-at-point)))))))
 
 (defun dired-auto-readme--insert (&optional _)
   "Insert content of Readme file in a current Dired buffer.
