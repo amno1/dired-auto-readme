@@ -34,7 +34,8 @@ considered as readme files. The expressions will be tried in the order as
 specified, so you can controll which file takes precidence.
 
 Example:
-#being_src emacs-lisp
+
+#begin_src emacs-lisp
 (setq dired-auto-readme-file '("manifest"
                                "readme\\.\\(org\\|rst\\|md\\|markdown\\)"
 #end_src
