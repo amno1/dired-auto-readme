@@ -29,24 +29,17 @@ There are few settings that can be modified, either via
 customize->Files->Dired Auto Readme or by setting the variables in init file or
 a running Emacs session.
 
-dired-auto-readme-files - A regular expression to specify what is considered as
-readme files.
+dired-auto-readme-files - A list of regular expressions to specify what is
+considered as readme files. The expressions will be tried in the order as
+specified, so you can controll which file takes precidence.
 
-dired-auto-readme-alist - A list holding hooks to be called when a major mode is
-enabled in a readme file. It will be called *after* the mode and font-lock are
-enabled. For example I have this in my init file to enable some org/markdown
-features and to actually enble "view" version of those modes for cleaner preview:
+Example:
+#being_src emacs-lisp
+(setq dired-auto-readme-file '("MANIFEST" "[Rr]eadme\\|README))
+#end_src
 
-#+begin_src emacs-lisp
-(add-to-list 'dired-auto-readme-alist '(org-mode . org-view-mode))
-(add-to-list 'dired-auto-readme-alist '(markdown-mode . (lambda ()
-                                                          (markdown-view-mode)
-                                                          (font-lock-ensure))))
-#+end_src
-
-You might have to test a bit if you encounter issues. This mode *alters* the
-content of the dired buffer itself, so be sure to enable it as the very **last**
-of modes in your buffer.
+The above code will first check if file with name MANIFEST if available, and if
+found display that one, if not it look for a readme file.
 
 * Known Problems
 
