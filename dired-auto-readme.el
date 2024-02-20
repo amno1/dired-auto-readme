@@ -38,10 +38,9 @@
   :group 'files
   :prefix "dired-auto-readme")
 
-;; need this because directory-files cares about case 
-(defcustom dired-auto-readme-file "^\\([Rr]eadme\\|README\\|MANIFEST\\)"
-  "Regex used to tell which file is considered a readme file."
-  :type 'string
+(defcustom dired-auto-readme-files '("[Rr]eadme\\|README")
+  "A list of regular expressions used to tell which file to use."
+  :type '(list string)
   :group 'dired-auto-readme)
 
 (defcustom dired-auto-readme-alist nil
@@ -69,9 +68,14 @@ These hooks are called after the major mode is set and font-lock is enabled."
   "Insert content of Readme file in a current Dired buffer.
 
 This function assumes the content is not currently inserted."
-  (when-let* ((files (directory-files "./" nil dired-auto-readme-file))
+  (when-let* ((files (directory-files
+                      "./" nil (regexp-opt dired-auto-readme-files)))
               (files (cl-remove-if #'file-directory-p files))
-              (file (car files)))
+              (file (catch 'f
+                      (dolist (file files)
+                        (dolist (rg dired-auto-readme-files)
+                          (when (string-match-p rg file)
+                            (throw 'f file)))))))
     (with-silent-modifications
       (save-excursion
         (setq-local font-lock-fontify-region-function
