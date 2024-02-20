@@ -35,11 +35,12 @@ specified, so you can controll which file takes precidence.
 
 Example:
 #being_src emacs-lisp
-(setq dired-auto-readme-file '("MANIFEST" "[Rr]eadme\\|README))
+(setq dired-auto-readme-file '("manifest"
+                               "readme\\.\\(org\\|rst\\|md\\|markdown\\)"
 #end_src
 
 The above code will first check if file with name MANIFEST if available, and if
-found display that one, if not it look for a readme file.
+found, display that one, if not it look for a readme file.
 
 * Known Problems
 
@@ -84,6 +85,23 @@ file, so I prefer having them as plain text so I can move cursor freely in and
 out and copy text, click on links etc.
 
 * News
+
+<2024-02-20 tis>
+
+Again, more or less complete rework. We don't use directory-files anymore. That
+should be quite a speedup on its own. The implication is that names are no
+longer case-sensitive, since we are using whatever ls program produces and same
+stuff that Dired sees.
+
+We can now also control the order in which readme files are found, so it is
+possible to prefer some special file before a README file. Observe, that we are
+using string-match-p to compare file names, so craft your regexes carefully :).
+
+The internals are refactored to also be more efficient and do less work with
+copying visibility spec. Finally, but most! importantly there was a nasty bug
+which made font-lock always call our font-lock-region-functions which made Emacs
+font-lock really slow. It is now fixed and at least things seem to work fine for
+me for several days.
 
 <2022-09-21 ons>
 

@@ -38,7 +38,7 @@
   :group 'files
   :prefix "dired-auto-readme")
 
-(defcustom dired-auto-readme-files '("[Rr]eadme\\|README")
+(defcustom dired-auto-readme-files '("readme\\.\\(org\\|rst\\|md\\|markdown\\)")
   "A list of regular expressions used to tell which file to use."
   :type '(list string)
   :group 'dired-auto-readme)
@@ -64,18 +64,24 @@ These hooks are called after the major mode is set and font-lock is enabled."
   "Fontify Dired portion of the buffer."
   (font-lock-default-fontify-region 1 (dired-auto-readme--point) v))
 
+(defun dired-auto-readme--find-file (regex)
+  "Return first file-name in a `current-buffer' matching REGEX."
+  (goto-char (point-min))
+  (catch 'file
+    (save-excursion
+      (while (dired-next-line 1)
+        (let ((file (dired-file-name-at-point)))
+          (when (string-match-p regex file)
+            (throw 'file file)))))))
+
 (defun dired-auto-readme--insert (&optional _)
   "Insert content of Readme file in a current Dired buffer.
 
 This function assumes the content is not currently inserted."
-  (when-let* ((files (directory-files
-                      "./" nil (regexp-opt dired-auto-readme-files)))
-              (files (cl-remove-if #'file-directory-p files))
-              (file (catch 'f
-                      (dolist (file files)
-                        (dolist (rg dired-auto-readme-files)
-                          (when (string-match-p rg file)
-                            (throw 'f file)))))))
+  (when-let* ((file (catch 'f
+                      (dolist (r dired-auto-readme-files)
+                        (when-let ((file (dired-auto-readme--find-file r)))
+                          (throw 'f file))))))
     (with-silent-modifications
       (save-excursion
         (setq-local font-lock-fontify-region-function
