@@ -36,7 +36,7 @@ specified, so you can controll which file takes precidence.
 Example:
 
 #+begin_src emacs-lisp
-(setq dired-auto-readme-file '("manifest"
+(setq dired-auto-readme-file '("manifest\\W" ;; lets exclude manifest.jar
                                "readme\\.\\(org\\|rst\\|md\\|markdown\\)"
 #+end_src
 
@@ -96,7 +96,8 @@ stuff that Dired sees.
 
 We can now also control the order in which readme files are found, so it is
 possible to prefer some special file before a README file. Observe, that we are
-using string-match-p to compare file names, so craft your regexes carefully :).
+using looking-at-p to compare file names in Dired buffer, so craft your regexes
+carefully.
 
 The internals are refactored to also be more efficient and do less work with
 copying visibility spec. Finally, but most! importantly there was a nasty bug
