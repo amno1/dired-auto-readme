@@ -79,7 +79,8 @@ The hook is called after the text has been inserted in Dired buffer."
   (catch 'file
     (save-excursion
       (while (dired-next-line 1)
-        (let ((file (dired-file-name-at-point)))
+        (let ((file (dired-file-name-at-point))
+              (case-fold-search t))
           (unless (file-directory-p file)
             (dolist (rg dired-auto-readme-files)
               (when (looking-at-p rg)
