@@ -5,7 +5,7 @@
 ;; Author: Arthur Miller
 ;; Version: 1.0.0
 ;; Keywords: tools convenience
-;; Package-Requires: ((emacs "27.1") (markdown-mode))
+;; Package-Requires: ((emacs "29.1") (markdown-mode "2.5"))
 ;; URL: https://github.com/amno1/dired-auto-readme
 
 ;;; Licence
@@ -41,12 +41,12 @@
   :group 'files
   :prefix "dired-auto-readme")
 
-(defcustom dired-auto-readme-files '("readme\\W"
-                                     "readme.md"
+(defcustom dired-auto-readme-files '("readme.md"
                                      "readme.org"
                                      "readme.rst"
                                      "readme.markdown"
-                                     "manifest\\W")
+                                     "readme"
+                                     "manifest")
   "A list of regular expressions used to tell which file to use."
   :type '(list string)
   :group 'dired-auto-readme)
@@ -82,7 +82,7 @@ The hook is called after the text has been inserted in Dired buffer."
         (let ((file (dired-file-name-at-point)))
           (unless (file-directory-p file)
             (dolist (rg dired-auto-readme-files)
-              (when (looking-at-p rg)              
+              (when (looking-at-p rg)
                 (throw 'file file)))))))))
 
 (defun dired-auto-readme--insert (&optional _)
@@ -124,10 +124,10 @@ This function assumes the content is not currently inserted."
   (when (eq major-mode 'dired-mode)
     (with-silent-modifications
       (dired-auto-readme--insert)
-      (revert-buffer t t))))
+      (dired-revert t t))))
 
 (defun dired-auto-readme--disable ()
-  "Remove README file from the current Dired buffer."  
+  "Remove README file from the current Dired buffer."
   (remove-hook 'dired-after-readin-hook #'dired-auto-readme--insert t)
   (remove-hook 'dired-before-readin-hook #'dired-auto-readme--remove t)
   (advice-remove 'dired-create-directory #'dired-auto-readme--insert)
@@ -139,7 +139,7 @@ This function assumes the content is not currently inserted."
   (and (eq major-mode 'dired-mode)
     (with-silent-modifications
       (dired-auto-readme--remove)
-      (revert-buffer t t))))
+      (dired-revert t t))))
 
 (defun dired-auto-readme--read-in (file)
   "Internal function that actually does the work.
