@@ -31,17 +31,15 @@
 ;; those for prettier previews.
 
 ;;; Code:
+(require 'text-property-search)
+
 
 ;;; User Options
+
 (defgroup dired-auto-readme nil
   "Automatically display 'readme' files when present in a Dired buffer."
   :group 'files
   :prefix "dired-auto-readme")
-
-(defun dired-auto-readme-fake-org ()
-  "Hack to display descriptive links in Dired buffer."
-  (message "ORG-FOLD-INITIALIZE")
-  (org-fold-initialize "..."))
 
 (defcustom dired-auto-readme-files '("readme\\W"
                                      "readme.md"
@@ -60,7 +58,10 @@ The hook is called after the text has been inserted in Dired buffer."
   :type 'alist)
 
 ;;; Implementation
-(require 'text-property-search)
+
+(defun dired-auto-readme-fake-org ()
+  "Hack to display descriptive links in Dired buffer."
+  (org-fold-initialize "..."))
 
 (defun dired-auto-readme--point ()
   "Return point of readme-file insertion or end of dired-buffer."
@@ -94,9 +95,8 @@ This function assumes the content is not currently inserted."
         (setq-local font-lock-fontify-region-function
                     #'dired-auto-readme--fontify-region)
         (let* ((enable-local-variables nil)
-               (data (dired-auto-readme--text file))
-               (mode (cdr data))
-               (action (assoc mode dired-auto-readme-alist)))
+               (data (dired-auto-readme--read-in file))
+               (action (assoc (cdr data) dired-auto-readme-alist)))
           (goto-char (point-max))
           (insert (car data))
           (when action
@@ -106,7 +106,6 @@ This function assumes the content is not currently inserted."
   "Remove content of a Readme file from the current Dired buffer."
   (with-silent-modifications
     (save-excursion
-      (setq dired-auto-readme--text nil)
       ;; invisibility spec is left with some garbage; fix for another day
       (kill-local-variable 'font-lock-fontify-region-function)
       (when-let ((dar (dired-auto-readme--point)))
@@ -137,12 +136,12 @@ This function assumes the content is not currently inserted."
   (advice-remove 'dired-create-empty-file #'dired-auto-readme--remove)
   (advice-remove 'wdired-change-to-dired-mode #'dired-auto-readme--insert)
   (advice-remove 'wdired-change-to-wdired-mode #'dired-auto-readme--remove)
-  (and (eq major-mode 'dired-mode) dired-auto-readme--text
+  (and (eq major-mode 'dired-mode)
     (with-silent-modifications
       (dired-auto-readme--remove)
       (revert-buffer t t))))
 
-(defun dired-auto-readme--text (file)
+(defun dired-auto-readme--read-in (file)
   "Internal function that actually does the work.
 Argument FILE Readme file to insert."
   (with-temp-buffer
@@ -150,7 +149,6 @@ Argument FILE Readme file to insert."
       (insert "\n") ; put some space from the dired last file
       (insert-file-contents file)
       (set-auto-mode)
-      (setq dired-auto-readme--mode major-mode)
       (when (eq major-mode 'markdown-mode)
         (gfm-view-mode))
       (font-lock-mode)
