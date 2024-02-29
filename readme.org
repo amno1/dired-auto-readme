@@ -9,11 +9,7 @@ is displayed below the directory content. Cursor can freely move into the /Readm
 file content, and you can search, copy, click on links and call some Emacs
 functions on the content as avialable in respective modes. However, the file is
 read only so you can not modify it, and some other functionality normally found
-might also not be available.
-
-I suggest installing [[https://jblevins.org/projects/markdown-mode/][markdown-mode]], [[https://github.com/Fuco1/org-pretty-table][org-pretty-table]] and [[https://github.com/amno1/org-view-mode][org-view-mode]] for
-prettier renderings. This is just optional. To enable them, add those as options
-via user hook (see `dired-auto-readme-alist').
+will not be available.
 
 * Install
 
@@ -46,7 +42,7 @@ found, display that one, if not it look for a readme file.
 * Known Problems
 
 We are combining here two major modes from two different buffers in one buffer,
-something Emacs is not ment to do so there will be some problems. The real
+something Emacs is not ment to do, so there will be some problems. The real
 problem is that most minor modes expect to work with only one major mode buffer,
 in this case Dired. If a minor mode will do something over entire Dired buffer
 there will be issues, unfortunately. Sometimes it is enough to press 'g' to
@@ -70,7 +66,7 @@ tuned to work only on dired portion of the buffer.
 It is inneficient, but As I have tested, I don't notice any speed problems on my
 computer, even on one older dual core laptop from 2016. I guess it would need a
 directory with hundred files or really big readme file for this to be
-noticable (if org/markdown modes are already loaded in Emacs).
+noticable.
 
 To speed up things when browsing directories, I suggest loading org-mode,
 rst-mode and markdown-mode in an idle-timer when Emacs starts.
@@ -86,6 +82,16 @@ file, so I prefer having them as plain text so I can move cursor freely in and
 out and copy text, click on links etc.
 
 * News
+
+<2024-02-29 tor>
+
+After seveal fail attempts to copy over buffer-locals and all properties to fold
+spec, I finally gave up. What I believe would benefit Emacs was to refactor code
+for org-links in its own minor mode to make org-links available in any
+mode. However, to come around, mode-alist in dired-auto-readme now means to
+execute a hook after the text is inserted. At least I can initialize parts of
+org-mode that manage folding so links are rendered as descriptive. Rest seems to
+be more or less in text properties.
 
 <2024-02-20 tis>
 

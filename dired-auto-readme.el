@@ -5,7 +5,7 @@
 ;; Author: Arthur Miller
 ;; Version: 1.0.0
 ;; Keywords: tools convenience
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Requires: ((emacs "27.1") (markdown-mode))
 ;; URL: https://github.com/amno1/dired-auto-readme
 
 ;;; Licence
@@ -38,31 +38,34 @@
   :group 'files
   :prefix "dired-auto-readme")
 
-(defcustom dired-auto-readme-files '("manifest\\W"
-                                     "readme\\W"
+(defun dired-auto-readme-fake-org ()
+  "Hack to display descriptive links in Dired buffer."
+  (message "ORG-FOLD-INITIALIZE")
+  (org-fold-initialize "..."))
+
+(defcustom dired-auto-readme-files '("readme\\W"
                                      "readme.md"
                                      "readme.org"
                                      "readme.rst"
-                                     "readme.markdown")
+                                     "readme.markdown"
+                                     "manifest\\W")
   "A list of regular expressions used to tell which file to use."
   :type '(list string)
   :group 'dired-auto-readme)
 
-(defcustom dired-auto-readme-alist nil
+(defcustom dired-auto-readme-alist
+  '((org-mode . dired-auto-readme-fake-org))
   "List of modes and custom hooks to call when a README buffer is read-in.
-These hooks are called after the major mode is set and font-lock is enabled."
+The hook is called after the text has been inserted in Dired buffer."
   :type 'alist)
 
 ;;; Implementation
 (require 'text-property-search)
 
-(defvar-local dired-auto-readme--text nil
-  "Readme file content.")
-
 (defun dired-auto-readme--point ()
   "Return point of readme-file insertion or end of dired-buffer."
   (if-let ((dar (or (text-property-search-backward 'bis)
-                 (text-property-search-forward 'bis))))
+                    (text-property-search-forward 'bis))))
       (prop-match-beginning dar) (point-max)))
 
 (defun dired-auto-readme--fontify-region (_ _ &optional v)
@@ -90,10 +93,14 @@ This function assumes the content is not currently inserted."
       (save-excursion
         (setq-local font-lock-fontify-region-function
                     #'dired-auto-readme--fontify-region)
-        (let ((enable-local-variables nil))
-          (setq dired-auto-readme--text (dired-auto-readme--text file))
+        (let* ((enable-local-variables nil)
+               (data (dired-auto-readme--text file))
+               (mode (cdr data))
+               (action (assoc mode dired-auto-readme-alist)))
           (goto-char (point-max))
-          (insert dired-auto-readme--text))))))
+          (insert (car data))
+          (when action
+            (funcall (cdr action))))))))
 
 (defun dired-auto-readme--remove (&optional _)
   "Remove content of a Readme file from the current Dired buffer."
@@ -143,9 +150,9 @@ Argument FILE Readme file to insert."
       (insert "\n") ; put some space from the dired last file
       (insert-file-contents file)
       (set-auto-mode)
-      (run-hooks (intern-soft (concat (symbol-name major-mode) "-hook")))
-      (when-let ((hook (cdr (assoc major-mode dired-auto-readme-alist))))
-        (funcall hook))
+      (setq dired-auto-readme--mode major-mode)
+      (when (eq major-mode 'markdown-mode)
+        (gfm-view-mode))
       (font-lock-mode)
       (font-lock-ensure)
       (goto-char 1)
@@ -155,7 +162,7 @@ Argument FILE Readme file to insert."
                   't))
       ;; insert two spaces to align to text in dired-mode
       (while (not (eobp)) (insert "  ") (forward-line))
-      (buffer-string))))
+      (cons (buffer-string) major-mode))))
 
 ;;; User commands
 ;;;###autoload
