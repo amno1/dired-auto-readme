@@ -31,6 +31,10 @@
 ;; those for prettier previews.
 
 ;;; Code:
+
+(require 'dired)
+(require 'org-fold)
+(require 'markdown-mode)
 (require 'text-property-search)
 
 
