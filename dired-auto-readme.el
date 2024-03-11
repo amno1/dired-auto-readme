@@ -73,9 +73,9 @@ The hook is called after the text has been inserted in Dired buffer."
                     (text-property-search-forward 'bis))))
       (prop-match-beginning dar) (point-max)))
 
-(defun dired-auto-readme--fontify-region (_ _ &optional _)
+(defun dired-auto-readme--fontify-region (_ _ _)
   "Fontify Dired portion of the buffer."
-  (font-lock-default-fontify-region 1 (dired-auto-readme--point)))
+  (font-lock-default-fontify-region 1 (dired-auto-readme--point) nil))
 
 (defun dired-auto-readme--find-file ()
   "Return first file-name in a `current-buffer' matching REGEX."
