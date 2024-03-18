@@ -1,4 +1,4 @@
- [[https://img.shields.io/badge/License-GPLv3-blue.svg]]
+#+html: <a href="https://melpa.org/packages/dired-auto-readme"><img alt="MELPA" src="https://melpa.org/packages/dired-auto-readme.svg"/></a> [[https://img.shields.io/badge/License-GPLv3-blue.svg]]
 
 * Dired Auto Readme
 
