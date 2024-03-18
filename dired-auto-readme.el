@@ -1,4 +1,4 @@
-;;; dired-auto-readme.el --- Auto-display README file in Dired biffers -*- lexical-binding: t; -*-
+;;; dired-auto-readme.el --- Auto-display README file in Dired buffers -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Arthur Miller
 
