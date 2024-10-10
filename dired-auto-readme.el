@@ -78,17 +78,16 @@ The hook is called after the text has been inserted in Dired buffer."
   (font-lock-default-fontify-region 1 (dired-auto-readme--point) nil))
 
 (defun dired-auto-readme--find-file ()
-  "Return first file-name in a `current-buffer' matching REGEX."
-  (goto-char (point-min))
+  "Return first file-name in a `current-buffer' matching "
   (catch 'file
     (save-excursion
+      (goto-char (point-min))
       (while (dired-next-line 1)
-        (let ((file (dired-file-name-at-point))
+        (let ((file (file-name-nondirectory (dired-file-name-at-point)))
               (case-fold-search t))
-          (unless (file-directory-p file)
+          (when (and (file-exists-p file) (not (file-directory-p file)))
             (dolist (rg dired-auto-readme-files)
-              (when (looking-at-p rg)
-                (throw 'file file)))))))))
+              (when (looking-at-p rg) (throw 'file file)))))))))
 
 (defun dired-auto-readme--insert (&optional _)
   "Insert content of Readme file in a current Dired buffer.
@@ -148,6 +147,7 @@ This function assumes the content is not currently inserted."
 
 (defun dired-auto-readme--read-in (file)
   "Internal function that actually does the work.
+
 Argument FILE Readme file to insert."
   (with-temp-buffer
     (let ((buffer-file-name file))
