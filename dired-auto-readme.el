@@ -94,9 +94,9 @@ The hook is called after the text has been inserted in Dired buffer."
   "Insert content of Readme file in a current Dired buffer.
 
 This function assumes the content is not currently inserted."
-  (when-let* ((file (dired-auto-readme--find-file)))
-    (with-silent-modifications
-      (save-excursion
+  (save-excursion
+    (when-let* ((file (dired-auto-readme--find-file)))
+      (with-silent-modifications
         (setq-local font-lock-fontify-region-function
                     #'dired-auto-readme--fontify-region)
         (let* ((enable-local-variables nil)
