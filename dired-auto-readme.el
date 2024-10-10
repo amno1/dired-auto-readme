@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020  Arthur Miller
 
 ;; Author: Arthur Miller
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;; Keywords: tools convenience
 ;; Package-Requires: ((emacs "29.1") (markdown-mode "2.5"))
 ;; URL: https://github.com/amno1/dired-auto-readme
