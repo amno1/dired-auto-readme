@@ -60,6 +60,11 @@
   "List of modes and custom hooks to call when a README buffer is read-in.
 The hook is called after the text has been inserted in Dired buffer."
   :type 'alist)
+
+(defcustom dired-auto-readme-separator ?\n
+  "Separator inserted before the Dired content and a file content.
+
+It can be anything that `insert' function accepts (a character or a string).")
 
 ;;; Implementation
 
@@ -151,7 +156,7 @@ This function assumes the content is not currently inserted."
 Argument FILE Readme file to insert."
   (with-temp-buffer
     (let ((buffer-file-name file))
-      (insert "\n") ; put some space from the dired last file
+      (insert dired-auto-readme-separator) ; put some space from the dired last file
       (insert-file-contents file)
       (set-auto-mode)
       (when (eq major-mode 'markdown-mode)
