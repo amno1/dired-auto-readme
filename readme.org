@@ -33,7 +33,7 @@ Example:
 
 #+begin_src emacs-lisp
 (setq dired-auto-readme-file '("manifest\\W" ;; lets exclude manifest.jar
-                               "readme\\.\\(org\\|rst\\|md\\|markdown\\)"
+                               "readme\\.\\(org\\|rst\\|md\\|markdown\\)"))
 #+end_src
 
 The above code will first check if file with name MANIFEST if available, and if
