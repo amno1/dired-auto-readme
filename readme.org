@@ -13,8 +13,9 @@ will not be available.
 
 * Install
 
-This is not yet in either Elpa nor Melpa, so currently you will have to either
-clone this repository or just download raw dired-auto-readme.el somewhere where
+This is not yet in Elpa, but is available in Melpa. ensure Melpa is added as a package archive, and run ~M-x package-install RET dired-auto-readme RET~
+
+If you want to install manually, clone this repository or just download raw dired-auto-readme.el somewhere where
 your Emacs can find it.
 
 * Usage
