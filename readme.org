@@ -19,7 +19,10 @@ your Emacs can find it.
 
 * Usage
 
-To enable/disable dired-auto-readme-mode: M-x dired-auto-readme-mode.
+To enable/disable dired-auto-readme-mode: M-x dired-auto-readme-mode. Alternatively, add a hook to your configuration-file:
+#+begin_src emacs-lisp
+  (add-hook 'dired-mode-hook 'dired-auto-readme-mode)
+#+end_src
 
 There are few settings that can be modified, either via
 customize->Files->Dired Auto Readme or by setting the variables in init file or
@@ -32,8 +35,8 @@ specified, so you can controll which file takes precidence.
 Example:
 
 #+begin_src emacs-lisp
-(setq dired-auto-readme-file '("manifest\\W" ;; lets exclude manifest.jar
-                               "readme\\.\\(org\\|rst\\|md\\|markdown\\)"))
+  (setq dired-auto-readme-file '("manifest\\W" ;; lets exclude manifest.jar
+				 "readme\\.\\(org\\|rst\\|md\\|markdown\\)"))
 #+end_src
 
 The above code will first check if file with name MANIFEST if available, and if
