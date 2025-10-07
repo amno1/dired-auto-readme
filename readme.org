@@ -13,7 +13,9 @@ will not be available.
 
 * Install
 
-This is available from Melpa. To install, ensure Melpa is added as a package archive, and run ~M-x package-install RET dired-auto-readme RET.
+This is available from Melpa. To install, ensure Melpa is added as a package archive, and run:
+
+    M-x package-install RET dired-auto-readme RET.
 
 If you want to install manually, clone this repository or just download raw dired-auto-readme.el somewhere where
 your Emacs can find it.
@@ -143,5 +145,6 @@ Completely reworked, with better org/markdown preview.
 * License
 
 GPL v3. For details, see the attached [[file:LICENSE][license file]].
+
 
 
